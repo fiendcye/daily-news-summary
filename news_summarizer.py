@@ -13,7 +13,7 @@ def get_news_headlines():
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, verify=False) # 添加 verify=False
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'xml')
         items = soup.find_all('item')
@@ -33,7 +33,7 @@ def get_article_content(url):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
     try:
-        response = requests.get(url, headers=headers, timeout=15)
+        response = requests.get(url, headers=headers, timeout=15, verify=False) # 添加 verify=False
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
         
@@ -96,7 +96,7 @@ def clean_old_summaries(today_date_str):
             print(f"Error deleting file {f}: {e}")
 
 def main():
-    today_date_str = datetime.now().strftime('%Y-%m-%d')
+    today_date_str = datetime.now().strftime("%Y-%m-%d")
     clean_old_summaries(today_date_str)
 
     news_headlines = get_news_headlines()
