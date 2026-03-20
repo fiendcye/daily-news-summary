@@ -41,28 +41,34 @@ def get_article_content(url):
         return ""
 
 def summarize_text_with_ai(text):
-    openai.api_key = os.getenv("OPENAI_API_KEY")
-    if not openai.api_key:
-        return "OPENAI_API_KEY not set."
+    # scnet.cn OpenAI-compatible API configuration
+    api_key = os.getenv("OPENAI_API_KEY")
+    base_url = "https://api.scnet.cn/api/llm/v1" # scnet.cn OpenAI-compatible base URL
+    
+    if not api_key:
+        return "API_KEY not set."
+    
+    client = openai.OpenAI(api_key=api_key, base_url=base_url)
+    
     try:
-        response = openai.chat.completions.create(
-            model="gpt-4.1-mini", # Using a cost-effective model
+        response = client.chat.completions.create(
+            model="MiniMax-M2.5", # MiniMax model name on scnet.cn
             messages=[
-                {"role": "system", "content": "You are a helpful assistant that summarizes news articles concisely."},
-                {"role": "user", "content": f"Please summarize the following news article in about 3-5 sentences: {text}"}
+                {"role": "system", "content": "你是一个专业的新闻摘要助手，请用简洁的中文总结新闻内容。"},
+                {"role": "user", "content": f"请用3-5句话总结以下新闻文章：{text}"}
             ]
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
         print(f"Error summarizing text with AI: {e}")
-        return "Error in summarization."
+        return "摘要生成出错。"
 
 def main():
     news_headlines = get_news_headlines()
     summary_output = f"# 每日新闻摘要 - {datetime.now().strftime('%Y-%m-%d')}\n\n"
 
     for i, news in enumerate(news_headlines[:5]): # Summarize top 5 news articles
-        print(f"Processing news item {i+1}: {news['title']}")
+        print(f"正在处理第 {i+1} 条新闻: {news['title']}")
         article_content = get_article_content(news['link'])
         if article_content:
             summary = summarize_text_with_ai(article_content)
@@ -77,7 +83,7 @@ def main():
     output_filename = f"news_summary_{datetime.now().strftime('%Y-%m-%d')}.md"
     with open(output_filename, 'w', encoding='utf-8') as f:
         f.write(summary_output)
-    print(f"News summary saved to {output_filename}")
+    print(f"新闻摘要已保存至 {output_filename}")
 
 if __name__ == "__main__":
     main()
